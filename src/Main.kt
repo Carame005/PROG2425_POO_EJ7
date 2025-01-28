@@ -13,15 +13,23 @@ class Cuenta(var numCuenta : Int, var saldo : Double){
     }
 }
 
-class Persona( var dni : String, cuentas : Array<Cuenta>){
-    private val maxCuentas : Int = 3
+class Persona( var dni : String){
+    val cuentas : Array<Cuenta?> = Array(3) { null }
+    companion object{
+        private val maxCuentas : Int = 3
+    }
     init {
         require(dni.length == 9){"El DNI debe ser de 9 digitos"}
         require(cuentas.size <= maxCuentas){"No puedes tener más de 3 cuentas"}
         }
 
-    fun añadirCuenta(nuevaCuenta : Cuenta){
-
+    fun añadirCuenta(nuevaCuenta : Cuenta) : Array<Cuenta?>{
+        var i = 0
+        if (i <= maxCuentas){
+            cuentas[i] = nuevaCuenta
+            i += 1
+        }
+        return cuentas
     }
 
 }

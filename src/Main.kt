@@ -1,15 +1,25 @@
 class Cuenta(var numCuenta : Int, var saldo : Double){
-    fun esMorosa(): Boolean{
-        if (saldo <= 0){
+    fun esMorosa(cuenta : Cuenta): Boolean{
+        if (cuenta.saldo <= 0){
             return true
         }
         return false
     }
     fun transferirDinero(persona1: Persona, persona2: Persona, cuenta1: Cuenta,cuenta2: Cuenta,saldo: Double) : Boolean{
         if ((saldo + cuenta1.saldo >= 0) && (cuenta2.saldo - saldo >= 0)){
+            cuenta1.saldo + saldo
+            cuenta2.saldo - saldo
+            println("Transaccion relizada con exito")
             return true
         }
+        ("No hay suficiente saldo oara realizar la transaccion, una de las cuentas queda en negativo")
         return false
+    }
+    fun ingresarDinero(cuenta: Cuenta, saldoAñadido: Double){
+        cuenta.saldo = cuenta.saldo + saldoAñadido
+    }
+    fun retirarDinero(cuenta : Cuenta, saldoAñadido: Double){
+        cuenta.saldo = cuenta.saldo - saldoAñadido
     }
 }
 
@@ -37,5 +47,18 @@ class Persona( var dni : String){
 
 
 fun main() {
+    val persona1 = Persona("58454762K")
+    val persona3 = Persona("77642711R")
+    val cuenta3 = Cuenta(1,0.0)
+    val cuenta4 = Cuenta(2,700.0)
 
+    cuenta3.ingresarDinero(cuenta3,1100.0)
+    cuenta4.retirarDinero(cuenta4,750.0)
+    try {
+        if(cuenta3.esMorosa(cuenta3) == true){
+            println("Esta persona es morosa")
+        }
+    }catch(e : IllegalArgumentException){"ERROR ${e.message}"}
+
+    cuenta4.transferirDinero(persona1,persona3,cuenta3 ,cuenta4,250.0)
 }

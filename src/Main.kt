@@ -1,64 +1,82 @@
-class Cuenta(var numCuenta : Int, var saldo : Double){
-    fun esMorosa(cuenta : Cuenta): Boolean{
-        if (cuenta.saldo <= 0){
-            return true
+class Cuenta(val numCuenta: Int, var saldo: Double) {
+
+    fun ingresarDinero(cantidad: Double) {
+        require(cantidad > 0) { "La cantidad a ingresar debe ser positiva" }
+        saldo += cantidad
+    }
+
+    fun retirarDinero(cantidad: Double): Boolean {
+        return if (saldo >= cantidad) {
+            saldo -= cantidad
+            true
+        } else {
+            println("Saldo insuficiente para retirar $cantidad euros.")
+            false
         }
-        return false
     }
-    fun transferirDinero(persona1: Persona, persona2: Persona, cuenta1: Cuenta,cuenta2: Cuenta,saldo: Double) : Boolean{
-        if ((saldo + cuenta1.saldo >= 0) && (cuenta2.saldo - saldo >= 0)){
-            cuenta1.saldo + saldo
-            cuenta2.saldo - saldo
-            println("Transaccion relizada con exito")
-            return true
+
+    fun transferirDinero(destino: Cuenta, cantidad: Double): Boolean {
+        return if (retirarDinero(cantidad)) {
+            destino.ingresarDinero(cantidad)
+            println("Transferencia de $cantidad€ realizada con éxito de cuenta $numCuenta a cuenta ${destino.numCuenta}.")
+            true
+        } else {
+            println("Transferencia fallida. No hay suficiente saldo en la cuenta $numCuenta.")
+            false
         }
-        ("No hay suficiente saldo oara realizar la transaccion, una de las cuentas queda en negativo")
-        return false
-    }
-    fun ingresarDinero(cuenta: Cuenta, saldoAñadido: Double){
-        cuenta.saldo = cuenta.saldo + saldoAñadido
-    }
-    fun retirarDinero(cuenta : Cuenta, saldoAñadido: Double){
-        cuenta.saldo = cuenta.saldo - saldoAñadido
     }
 }
 
-class Persona( var dni : String){
-    val cuentas : Array<Cuenta?> = Array(3) { null }
-    companion object{
-        private val maxCuentas : Int = 3
-    }
+class Persona(val dni: String) {
+    private val cuentas = arrayOfNulls<Cuenta>(3)
+
     init {
-        require(dni.length == 9){"El DNI debe ser de 9 digitos"}
-        require(cuentas.size <= maxCuentas){"No puedes tener más de 3 cuentas"}
-        }
-
-    fun añadirCuenta(nuevaCuenta : Cuenta) : Array<Cuenta?>{
-        var i = 0
-        if (i <= maxCuentas){
-            cuentas[i] = nuevaCuenta
-            i += 1
-        }
-        return cuentas
+        require(dni.length == 9) { "El DNI debe tener 9 caracteres" }
     }
 
+    fun añadirCuenta(nuevaCuenta: Cuenta): Boolean {
+        for (i in cuentas.indices) {
+            if (cuentas[i] == null) {
+                cuentas[i] = nuevaCuenta
+                return true
+            }
+        }
+        println("No se pueden añadir más cuentas. Límite de 3 alcanzado.")
+        return false
+    }
+
+    fun esMorosa(): Boolean {
+        return cuentas.any { it?.saldo ?: 0.0 < 0 }
+    }
+
+    fun obtenerCuenta(numCuenta: Int): Cuenta? {
+        return cuentas.find { it?.numCuenta == numCuenta }
+    }
+
+    fun mostrarCuentas() {
+        println("Cuentas de $dni:")
+        for (cuenta in cuentas) {
+            cuenta?.let { println("Cuenta ${it.numCuenta}: ${it.saldo}€") }
+        }
+    }
 }
-
-
 
 fun main() {
-    val persona1 = Persona("58454762K")
-    val persona3 = Persona("77642711R")
-    val cuenta3 = Cuenta(1,0.0)
-    val cuenta4 = Cuenta(2,700.0)
+    val persona = Persona("58454762K")
 
-    cuenta3.ingresarDinero(cuenta3,1100.0)
-    cuenta4.retirarDinero(cuenta4,750.0)
-    try {
-        if(cuenta3.esMorosa(cuenta3) == true){
-            println("Esta persona es morosa")
-        }
-    }catch(e : IllegalArgumentException){"ERROR ${e.message}"}
+    val cuenta1 = Cuenta(1, 0.0)
+    val cuenta2 = Cuenta(2, 700.0)
 
-    cuenta4.transferirDinero(persona1,persona3,cuenta3 ,cuenta4,250.0)
+    persona.añadirCuenta(cuenta1)
+    persona.añadirCuenta(cuenta2)
+
+    cuenta1.ingresarDinero(1100.0)
+
+    cuenta2.retirarDinero(750.0)
+
+    println("¿La persona es morosa? ${if (persona.esMorosa()) "Sí" else "No"}")
+
+    cuenta1.transferirDinero(cuenta2, 250.0)
+
+    persona.mostrarCuentas()
 }
